@@ -1,0 +1,333 @@
+================================================================================
+                    PROJECT STRUCTURE OVERVIEW
+================================================================================
+
+online-exam-system/
+│
+├── 📁 admin/                          # Admin Panel (Exam Manager)
+│   ├── 📁 includes/
+│   │   ├── header.php                 # Reusable admin header
+│   │   └── footer.php                 # Reusable admin footer
+│   │
+│   ├── dashboard.php                  # Admin dashboard with statistics
+│   ├── exams.php                      # Exam CRUD operations
+│   ├── questions.php                  # Question management (5 types)
+│   ├── students.php                   # Student management & performance
+│   ├── results.php                    # Analytics & results dashboard
+│   └── settings.php                   # Admin settings
+│
+├── 📁 student/                        # Student Portal (Candidates)
+│   ├── 📁 includes/
+│   │   ├── header.php                 # Reusable student header
+│   │   └── footer.php                 # Reusable student footer
+│   │
+│   ├── dashboard.php                  # Student dashboard
+│   ├── exam_instructions.php          # Pre-exam instructions
+│   ├── take_exam.php                  # Main exam interface (timer, nav)
+│   ├── view_result.php                # Detailed result view
+│   ├── my_results.php                 # Exam history
+│   ├── profile.php                    # Student profile
+│   │
+│   ├── save_answers.php               # AJAX: Auto-save answers
+│   ├── track_tab_switch.php           # AJAX: Anti-cheating tracking
+│   └── submit_exam.php                # AJAX: Submit & grade exam
+│
+├── 📁 config/                         # Configuration Files
+│   ├── config.php                     # Application settings
+│   └── database.php                   # Database connection & helpers
+│
+├── 📁 includes/                       # Shared Functions
+│   ├── security.php                   # Security functions (CSRF, XSS, etc.)
+│   ├── auth.php                       # Authentication & authorization
+│   └── exam_functions.php             # Exam-related business logic
+│
+├── 📁 assets/                         # Static Assets
+│   ├── 📁 css/                        # Custom stylesheets
+│   ├── 📁 js/                         # Custom JavaScript
+│   └── 📁 images/                     # Images and icons
+│
+├── 📁 logs/                           # Application Logs
+│   └── error.log                      # Error logging
+│
+├── 📄 index.php                       # Entry point (redirects to dashboard)
+├── 📄 login.php                       # Login page
+├── 📄 register.php                    # Student registration
+├── 📄 logout.php                      # Logout handler
+│
+├── 📄 database_schema.sql             # Complete database schema
+├── 📄 ERD.md                          # Database ERD documentation
+├── 📄 README.md                       # Comprehensive documentation
+├── 📄 INSTALLATION.md                 # Quick installation guide
+├── 📄 FEATURES.md                     # Complete features checklist
+├── 📄 CREDENTIALS.txt                 # Login credentials
+├── 📄 PROJECT_STRUCTURE.txt           # This file
+│
+└── 📄 .htaccess                       # Apache configuration & security
+
+================================================================================
+                        KEY COMPONENTS
+================================================================================
+
+🔐 SECURITY LAYER
+├── CSRF Protection (includes/security.php)
+├── XSS Prevention (sanitization)
+├── SQL Injection Prevention (prepared statements)
+├── Session Management (secure sessions)
+├── Password Hashing (bcrypt)
+└── Input Validation (client & server)
+
+🎯 AUTHENTICATION
+├── Login System (login.php)
+├── Registration (register.php)
+├── Role-Based Access (admin/student)
+├── Session Handling (includes/security.php)
+└── Logout (logout.php)
+
+📝 EXAM SYSTEM
+├── Exam Management (admin/exams.php)
+├── Question Types (admin/questions.php)
+│   ├── Multiple Choice
+│   ├── Multiple Select
+│   ├── True/False
+│   ├── Short Answer
+│   └── Fill in the Blank
+├── Exam Taking (student/take_exam.php)
+├── Timer System (JavaScript)
+├── Auto-save (AJAX)
+└── Auto-submit (JavaScript + AJAX)
+
+📊 ANALYTICS
+├── Admin Dashboard (admin/dashboard.php)
+├── Results Dashboard (admin/results.php)
+├── Student Performance (admin/students.php)
+└── Exam Statistics (database views)
+
+🛡️ ANTI-CHEATING
+├── Tab Switch Detection (JavaScript)
+├── Tab Switch Logging (student/track_tab_switch.php)
+├── Warning System (visual alerts)
+└── Admin Monitoring (admin/results.php)
+
+💾 DATABASE
+├── 8 Tables (users, exams, questions, etc.)
+├── 2 Views (statistics, performance)
+├── 1 Stored Procedure (score calculation)
+├── Triggers (auto-update total marks)
+└── Foreign Keys (data integrity)
+
+================================================================================
+                        PROJECT FLOW & DATA FLOW
+================================================================================
+
+COMPLETE SYSTEM FLOW:
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         AUTHENTICATION FLOW                              │
+└─────────────────────────────────────────────────────────────────────────┘
+
+User Registration:
+  Register Page → Validate Input → Check Uniqueness → Hash Password 
+  → Create Account → Redirect to Login
+
+User Login:
+  Login Page → Validate Credentials → Check Rate Limit → Verify Password
+  → Generate CSRF Token → Create Session → Role-Based Redirect
+  → Admin Dashboard OR Student Dashboard
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         ADMIN WORKFLOW                                   │
+└─────────────────────────────────────────────────────────────────────────┘
+
+ADMIN EXAM CREATION FLOW:
+┌─────────────┐
+│   Login     │ ◄── Admin credentials validated
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│  Dashboard  │ ◄── View statistics, exams, students
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ Create Exam │ ◄── Set title, description, duration, passing marks
+│             │ ◄── Configure: retake, shuffle, show results
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│Add Questions│ ◄── Select question type (5 types)
+│             │ ◄── Enter question text, set marks
+│             │ ◄── Add options (MCQ/True-False)
+│             │ ◄── Mark correct answers
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│Publish Exam │ ◄── Change status: Draft → Published
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│   Monitor   │ ◄── View attempts, analytics, tab switches
+│             │ ◄── Track student performance
+│             │ ◄── Generate reports
+└─────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         STUDENT WORKFLOW                                 │
+└─────────────────────────────────────────────────────────────────────────┘
+
+STUDENT EXAM FLOW:
+┌─────────────┐
+│   Login     │ ◄── Student credentials validated
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│  Dashboard  │ ◄── View available exams (Published status)
+│             │ ◄── See exam history and results
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ Start Exam  │ ◄── Click "Start Exam" button
+│             │ ◄── System checks retake policy
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│Instructions │ ◄── Read exam rules and guidelines
+│             │ ◄── Understand timer behavior
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│  Take Exam  │ ◄── Timer starts (server-synced)
+│             │ ◄── Auto-save active (every 30s)
+│             │ ◄── Tab switches monitored
+│             │ ◄── Question navigation enabled
+│             │ ◄── Progress tracking
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│   Submit    │ ◄── Manual submit OR Auto-submit (timer expires)
+│             │ ◄── Validate all answers
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│  Grading    │ ◄── Automatic grading (objective questions)
+│             │ ◄── Score calculation
+│             │ ◄── Pass/Fail determination
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│   Results   │ ◄── View score, percentage, pass/fail
+│             │ ◄── See correct/incorrect answers
+│             │ ◄── Review detailed breakdown
+└─────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         REAL-TIME FEATURES FLOW                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Timer Synchronization:
+  Client Timer → Poll Server (every 30s) → Server calculates remaining time
+  → Return to client → Update display → Auto-submit if expired
+
+Auto-save Flow:
+  User answers → Collect answers → AJAX POST (every 30s) → Validate CSRF
+  → Store in database → Return success → Update UI indicator
+
+Tab Switch Detection:
+  Visibility change event → AJAX POST → Increment counter → Store in DB
+  → Show warning if threshold exceeded → Admin can view count
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         SECURITY FLOW                                    │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Request Flow:
+  User Input → Client Validation → Server Validation → CSRF Check
+  → XSS Sanitization → SQL Injection Prevention → Business Logic
+  → Database (Prepared Statements) → Response → Output Sanitization
+  → Display to User
+
+Session Security:
+  Login → Generate secure token → HTTP-only cookie → Session expiration
+  → IP tracking → Activity logging → Auto-logout on timeout
+
+================================================================================
+                        TECHNOLOGY STACK
+================================================================================
+
+Frontend:
+├── HTML5                              # Structure
+├── CSS3                               # Styling
+├── Bootstrap 5.3.2                    # UI Framework (Latest)
+├── JavaScript (ES6+)                  # Interactivity
+└── jQuery 3.7.1                       # DOM & AJAX (Latest)
+
+Backend:
+├── PHP 7.4+                           # Server-side logic
+└── MySQL 5.7+                         # Database
+
+Libraries (CDN):
+├── Bootstrap CSS & JS
+├── Bootstrap Icons
+└── jQuery
+
+No additional packages or frameworks used!
+
+================================================================================
+                        FILE STATISTICS
+================================================================================
+
+Total Files:        45+
+PHP Files:          30+
+Documentation:      6
+Configuration:      3
+Database:           1 (SQL)
+
+Lines of Code:      5,000+
+Functions:          100+
+Database Tables:    8
+Question Types:     5
+
+================================================================================
+                        SECURITY MEASURES
+================================================================================
+
+✓ All user inputs sanitized
+✓ Prepared statements for database queries
+✓ CSRF tokens on all forms
+✓ Session security (httponly, timeout)
+✓ Password hashing (bcrypt, cost 12)
+✓ Login rate limiting (5 attempts/15 min)
+✓ Protected directories (.htaccess)
+✓ Error logging (not displayed to users)
+✓ XSS prevention (htmlspecialchars)
+✓ SQL injection prevention (mysqli prepared)
+
+================================================================================
+                        RESPONSIVE DESIGN
+================================================================================
+
+Breakpoints:
+├── Mobile:    < 768px
+├── Tablet:    768px - 991px
+├── Desktop:   992px - 1199px
+└── Large:     ≥ 1200px
+
+All pages are fully responsive and tested on:
+✓ Desktop browsers (Chrome, Firefox, Safari, Edge)
+✓ Tablets (iPad, Android tablets)
+✓ Mobile devices (iPhone, Android phones)
+
+================================================================================
+                        END OF STRUCTURE
+================================================================================
+

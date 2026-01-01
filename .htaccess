@@ -1,0 +1,53 @@
+# Apache Configuration for Online Examination System
+
+# Enable Rewrite Engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /online-exam-system/
+    
+    # Prevent directory browsing
+    Options -Indexes
+    
+    # Protect config directory
+    RewriteRule ^config/ - [F,L]
+    
+    # Protect includes directory
+    RewriteRule ^includes/ - [F,L]
+    
+    # Protect sensitive files
+    <FilesMatch "\.(sql|md|log|ini)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # XSS Protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Prevent MIME sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Referrer Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# PHP Settings
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+    php_flag display_errors Off
+    php_flag log_errors On
+</IfModule>
+
+# Error Pages
+ErrorDocument 404 /online-exam-system/index.php
+ErrorDocument 403 /online-exam-system/index.php
+
+
